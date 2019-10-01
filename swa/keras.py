@@ -9,11 +9,6 @@ class SWA(Callback):
     # Paper
         title: Averaging Weights Leads to Wider Optima and Better Generalization
         link: https://arxiv.org/abs/1803.05407
-        authors: Pavel Izmailov, 
-                 Dmitrii Podoprikhin, 
-                 Timur Garipov, 
-                 Dmitry Vetrov, 
-                 Andrew Gordon Wilson
     
     # Arguments
         swa_epochs: integer, the number epochs swa will be applied to.
