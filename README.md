@@ -6,7 +6,7 @@
 This is an implemention of SWA for Keras and TF-Keras. It is limited to only performing weight averaging and does not implement a learning rate scheduler.
 
 ## Introduction
-Stochastic weight averaging (SWA) build upon the same principle as [snapshot ensembling](https://arxiv.org/abs/1704.00109) and [fast geometric ensembling](https://arxiv.org/abs/1802.10026). The idea is that averaging select stages of training can lead to better models. Where as the two former methods average by ensembling sampled models, SWA instead average weights. This has been shown to give comparable improvements but with just one model as a result.
+Stochastic weight averaging (SWA) is build upon the same principle as [snapshot ensembling](https://arxiv.org/abs/1704.00109) and [fast geometric ensembling](https://arxiv.org/abs/1802.10026). The idea is that averaging select stages of training can lead to better models. Where as the two former methods average by sampling and ensembling models, SWA instead average weights. This has been shown to give comparable improvements confined into a single model.
 
 [![Illustration](https://raw.githubusercontent.com/simon-larsson/keras-swa/master/swa_illustration.png)](https://raw.githubusercontent.com/simon-larsson/keras-swa/master/swa_illustration.png)
 
