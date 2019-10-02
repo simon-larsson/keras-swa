@@ -12,7 +12,7 @@ setup(
     packages=find_packages(),
     author='Simon Larsson',
     author_email='simonlarsson0@gmail.com',
-    url='https://github.com/simon-larsson/extrakit-learn',
+    url='https://github.com/simon-larsson/keras-swa',
     license='MIT',
     install_requires=[],
     classifiers=['License :: OSI Approved :: MIT License',
