@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/keras-swa.svg)](https://pypi.python.org/pypi/keras-swa/) 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/simon-larsson/keras-swa/blob/master/LICENSE)
 
-This is an implemention of SWA for Keras and TF-Keras.
+This is an implemention of SWA for Keras and TF-Keras. It currently only implements the constant learning rate scheduler, the cyclic learning rate described in the paper will come soon. It also does not implement the batch normalization fix, which means that networks with batch normalization can have issues.
 
 ## Introduction
 Stochastic weight averaging (SWA) is build upon the same principle as [snapshot ensembling](https://arxiv.org/abs/1704.00109) and [fast geometric ensembling](https://arxiv.org/abs/1802.10026). The idea is that averaging select stages of training can lead to better models. Where as the two former methods average by sampling and ensembling models, SWA instead average weights. This has been shown to give comparable improvements confined into a single model.
@@ -25,7 +25,11 @@ Stochastic weight averaging (SWA) is build upon the same principle as [snapshot 
 Keras callback object for SWA.  
 
 #### Arguments
-`swa_epochs` - The number of epochs in the end of training where SWA is applied.
+`start_epoch` - Starting epoch for SWA.
+
+`lr_schedule` - Learning rate scheduler, `'optimizer'` or `'constant'`. Either let the optimizer handle learning rate or use constant decay from the paper.
+
+`swa_lr` - Minimum learning rate when not handled by optimizer.
 
 `verbose` - Verbosity mode, 0 or 1.
     
@@ -122,7 +126,6 @@ Epoch 2/100
 Epoch 74/100
 1000/1000 [==============================] - 0s 31us/step - loss: 0.3913
 Epoch 75/100
-
 Epoch 00075: starting stochastic weight averaging
 1000/1000 [==============================] - 0s 202us/step - loss: 0.3907
 Epoch 76/100
