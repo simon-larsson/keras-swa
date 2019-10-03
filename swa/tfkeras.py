@@ -45,7 +45,7 @@ class SWA(Callback):
             self.swa_weights = self.model.get_weights()
 
             if self.verbose > 0:
-                print('\nEpoch %05d: starting stochastic weight averaging'
+                print('Epoch %05d: starting stochastic weight averaging'
                       % (epoch + 1))
 
     def on_epoch_end(self, epoch, logs=None):
