@@ -25,13 +25,13 @@ Stochastic weight averaging (SWA) is build upon the same principle as [snapshot 
 Keras callback object for SWA.  
 
 #### Arguments
-`start_epoch` - Starting epoch for SWA.
+**start_epoch** - Starting epoch for SWA.
 
-`lr_schedule` - Learning rate scheduler, `'optimizer'` or `'constant'`. Either let the optimizer handle learning rate or use constant decay from the paper.
+**lr_schedule** - Learning rate scheduler, `'optimizer'` or `'constant'`. Either let the optimizer handle learning rate or use constant decay from the paper.
 
-`swa_lr` - Minimum learning rate when not handled by optimizer.
+**swa_lr** - Minimum learning rate when not handled by optimizer.
 
-`verbose` - Verbosity mode, 0 or 1.
+**verbose** - Verbosity mode, 0 or 1.
     
 #### Example
 
