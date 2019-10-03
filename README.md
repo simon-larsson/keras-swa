@@ -53,7 +53,7 @@ y = to_categorical(y)
 model = Sequential()
 model.add(Dense(50, input_dim=2, activation='relu'))
 model.add(Dense(3, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam')
+model.compile(loss='categorical_crossentropy', optimizer='sgd')
 
 epochs = 10
 swa_epochs = 4
@@ -88,9 +88,7 @@ y = to_categorical(y)
 model = Sequential()
 model.add(Dense(50, input_dim=2, activation='relu'))
 model.add(Dense(3, activation='softmax'))
-model.compile(loss='categorical_crossentropy', 
-              optimizer='adam', 
-              metrics=['acc'])
+model.compile(loss='categorical_crossentropy', optimizer='sgd')
 
 epochs = 10
 swa_epochs = 4
@@ -102,7 +100,7 @@ swa = SWA(swa_epochs=swa_epochs, verbose=1)
 model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
 ```
 
-Output:
+Output
 ```
 Epoch 1/10
 1000/1000 [==============================] - 0s 100us/step - loss: 1.1633
