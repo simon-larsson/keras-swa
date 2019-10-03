@@ -22,7 +22,7 @@ class SWA(Callback):
             
     def on_train_begin(self, logs=None):
         self.epochs = self.params.get('epochs')
-
+        
         if self.swa_epochs < 1:
             raise ValueError('"swa_epochs" attribute cannot be lower than 1.')
         
@@ -31,20 +31,25 @@ class SWA(Callback):
 
         self.start_epoch = self.epochs - self.swa_epochs
     
-    def on_epoch_end(self, epoch, logs=None):
+    def on_epoch_begin(self, epoch, logs=None):
         if epoch == self.start_epoch:
-            self.weights = self.model.get_weights()
+            self.swa_weights = self.model.get_weights()
             
             if self.verbose > 0:
                 print('\nEpoch %05d: starting stochastic weight averaging'
                       % (epoch + 1))
+    
+    def on_epoch_end(self, epoch, logs=None):
         
         if epoch >= self.start_epoch:
-            self.weights = [(weight * (epoch - self.start_epoch) + self.model.get_weights()[i]) / 
-                            ((epoch - self.start_epoch) + 1) for i, weight in enumerate(self.weights)]
-                           
+                    
+            self.swa_weights = [(swa_w * (epoch - self.start_epoch) + w)
+                                / ((epoch - self.start_epoch) + 1) 
+                                        for swa_w, w in zip(self.swa_weights, 
+                                                            self.model.get_weights())]
+                       
     def on_train_end(self, logs=None):
-        self.model.set_weights(self.weights)
+        self.model.set_weights(self.swa_weights)
         if self.verbose > 0:
             print('\nEpoch %05d: final model weights set to stochastic weight average'
                   % (self.epochs))
