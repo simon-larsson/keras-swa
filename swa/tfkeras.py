@@ -1,6 +1,9 @@
 """ TF-Keras SWA: callback utility for performing stochastic weight averaging (SWA).
 """
 
+import tensorflow.keras.backend as K
+from tensorflow.keras.callbacks import Callback
+
 class SWA(Callback):
     """ Stochastic Weight Averging.
 
