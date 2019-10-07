@@ -16,8 +16,8 @@ class SWA(Callback):
         start_epoch: integer, epoch when swa should start.
         lr_schedule: string, kind of learning rate schedule.
                         'optimizer': optimizer handles learning rate.
-                        'constant': learning rate will start with "lr", ramp down to "swa_lr"
-                                    and stay there.
+                        'constant': learning rate will start with "lr", ramp down to 
+                                    "swa_lr" and stay there.
         swa_lr: float, minimum learning rate.
         verbose: integer, verbosity mode, 0 or 1.
     """
@@ -35,7 +35,7 @@ class SWA(Callback):
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
-        self.samples = self.params.get('samples')
+        self.batch_size = self.params.get('batch_size')
         
         if self.start_epoch >= self.epochs - 1:
             raise ValueError('"swa_start" attribute must be lower than "epochs".')
@@ -60,10 +60,12 @@ class SWA(Callback):
                 
         if epoch == self.epochs - 1 and self.has_batch_norm:
             self._set_swa_weights(epoch)
-            self._fix_batch_norm()
+            self._reset_batch_norm()
+            self.running_bn_epoch = True
+            
             if self.verbose > 0:
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
-                      % (self.epochs))  
+                      % (self.epochs))
 
     def on_epoch_end(self, epoch, logs=None):
         
@@ -72,6 +74,15 @@ class SWA(Callback):
                                 / ((epoch - self.start_epoch) + 1)
                                         for swa_w, w in zip(self.swa_weights,
                                                             self.model.get_weights())]
+            
+    def on_batch_begin(self, batch, logs=None):
+        
+        if self.running_bn_epoch:
+            
+            momentum = self.batch_size / (batch*self.batch_size + self.batch_size)
+
+            for layer in self.batch_norm_layers:
+                layer.momentum = momentum
 
     def on_train_end(self, logs=None):
         
@@ -113,6 +124,7 @@ class SWA(Callback):
         self.batch_norm_momentums = []
         self.batch_norm_layers = []
         self.has_batch_norm = False
+        self.running_bn_epoch = False
         
         for layer in self.model.layers:
             if issubclass(layer.__class__, BatchNormalization):
@@ -124,25 +136,22 @@ class SWA(Callback):
             print('Model uses batch normalization. SWA will require last epoch '
                   'to be a forward pass and will run with no learning rate')
     
-    def _fix_batch_norm(self):
+    def _reset_batch_norm(self):
         
         for layer in self.batch_norm_layers:
             shape = (list(layer.input_spec.axes.values())[0],)
 
-            # reinitialize layers
             layer.moving_mean = layer.add_weight(
                 shape=shape,
                 name='moving_mean',
                 initializer=layer.moving_mean_initializer,
                 trainable=layer.moving_mean.trainable)
+            
             layer.moving_variance = layer.add_weight(
                 shape=shape,
                 name='moving_variance',
                 initializer=layer.moving_variance_initializer,
                 trainable=layer.moving_variance.trainable)
-
-            # set momentum for forward pass
-            layer.momentum = 1/self.samples
           
     def _restore_batch_norm(self):
         
