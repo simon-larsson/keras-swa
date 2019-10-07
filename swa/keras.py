@@ -87,7 +87,7 @@ class SWA(Callback):
                 
     def on_epoch_end(self, epoch, logs=None):
         
-        if epoch >= self.start_epoch:
+        if epoch >= self.start_epoch and not self.running_bn_epoch:
             self.swa_weights = [(swa_w * (epoch - self.start_epoch) + w)
                                 / ((epoch - self.start_epoch) + 1)
                                         for swa_w, w in zip(self.swa_weights,
