@@ -15,13 +15,13 @@ class SWA(Callback):
     # Arguments
         start_epoch: integer, epoch when swa should start.
         lr_schedule: string, kind of learning rate schedule.
-                        'optimizer': optimizer handles learning rate.
+                         None: optimizer or other scheduler handles learning rate.
                         'constant': learning rate will start with "lr", ramp down to 
                                     "swa_lr" and stay there.
         swa_lr: float, minimum learning rate.
         verbose: integer, verbosity mode, 0 or 1.
     """
-    def __init__(self, start_epoch, lr_schedule='optimizer', swa_lr=0.001, verbose=0):
+    def __init__(self, start_epoch, lr_schedule=None, swa_lr=0.001, verbose=0):
         
         super(SWA, self).__init__()
         self.start_epoch = start_epoch - 1
@@ -31,6 +31,15 @@ class SWA(Callback):
         
         if start_epoch < 2:
             raise ValueError('"swa_start" attribute cannot be lower than 2.')
+            
+        schedules = ['none', 'constant']
+        
+        if self.lr_schedule is None:
+            self.lr_schedule = 'none'
+        
+        if self.lr_schedule not in schedules:
+            raise ValueError('"{}" is not a valid learning rate schedule' \
+                             .format(self.lr_schedule))
 
     def on_train_begin(self, logs=None):
         
