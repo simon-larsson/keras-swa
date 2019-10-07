@@ -76,14 +76,6 @@ class SWA(Callback):
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
                       % (self.epochs))
 
-    def on_epoch_end(self, epoch, logs=None):
-        
-        if epoch >= self.start_epoch:
-            self.swa_weights = [(swa_w * (epoch - self.start_epoch) + w)
-                                / ((epoch - self.start_epoch) + 1)
-                                        for swa_w, w in zip(self.swa_weights,
-                                                            self.model.get_weights())]
-            
     def on_batch_begin(self, batch, logs=None):
         
         if self.running_bn_epoch:
@@ -92,6 +84,14 @@ class SWA(Callback):
 
             for layer in self.batch_norm_layers:
                 layer.momentum = momentum
+                
+    def on_epoch_end(self, epoch, logs=None):
+        
+        if epoch >= self.start_epoch:
+            self.swa_weights = [(swa_w * (epoch - self.start_epoch) + w)
+                                / ((epoch - self.start_epoch) + 1)
+                                        for swa_w, w in zip(self.swa_weights,
+                                                            self.model.get_weights())]
 
     def on_train_end(self, logs=None):
         
