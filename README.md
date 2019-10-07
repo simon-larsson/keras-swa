@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/keras-swa.svg)](https://pypi.python.org/pypi/keras-swa/) 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/simon-larsson/keras-swa/blob/master/LICENSE)
 
-This is an implemention of SWA for Keras and TF-Keras. It currently only implements the constant learning rate scheduler, the cyclic learning rate described in the paper will come soon. It also does not implement the batch normalization fix, which means that networks with batch normalization can have issues.
+This is an implemention of SWA for Keras and TF-Keras. It currently only implements the constant learning rate scheduler, the cyclic learning rate described in the paper will come soon.
 
 ## Introduction
 Stochastic weight averaging (SWA) is build upon the same principle as [snapshot ensembling](https://arxiv.org/abs/1704.00109) and [fast geometric ensembling](https://arxiv.org/abs/1802.10026). The idea is that averaging select stages of training can lead to better models. Where as the two former methods average by sampling and ensembling models, SWA instead average weights. This has been shown to give comparable improvements confined into a single model.
@@ -19,7 +19,11 @@ Stochastic weight averaging (SWA) is build upon the same principle as [snapshot 
 ## Installation
 
     pip install keras-swa
-    
+
+
+## Batch Normalization
+Last epoch will be a forward pass, i.e. have learning rate set to zero, for models with batch normalization. This is due to the fact that batch normalization uses the running mean and variance of it's preceding layer to make a normalization. SWA will offset this normalization by suddenly changing the weights in the end of training. Therefore it is necessary for the last epoch to be used to reset and recalculate batch normalization for the updated weights.
+
 ### SWA
 
 Keras callback object for SWA.  
@@ -27,12 +31,12 @@ Keras callback object for SWA.
 #### Arguments
 **start_epoch** - Starting epoch for SWA.
 
-**lr_schedule** - Learning rate scheduler, `'optimizer'` or `'constant'`. Either let the optimizer handle learning rate or use constant decay from the paper.
+**lr_schedule** - Learning rate scheduler (optional),  `'constant'` for the non-cyclic scheduler from the paper.
 
-**swa_lr** - Minimum learning rate when not handled by optimizer.
+**swa_lr** - Minimum learning rate for scheduler.
 
 **verbose** - Verbosity mode, 0 or 1.
-    
+
 #### Example
 
 For Keras
