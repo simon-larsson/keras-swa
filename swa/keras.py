@@ -13,26 +13,33 @@ class SWA(Callback):
         link: https://arxiv.org/abs/1803.05407
 
     # Arguments
-        start_epoch: integer, epoch when swa should start.
-        lr_schedule: string, kind of learning rate schedule.
-                         None: optimizer or other scheduler handles learning rate.
-                        'constant': learning rate will start with "lr", ramp down to 
-                                    "swa_lr" and stay there.
-        swa_lr: float, minimum learning rate.
-        verbose: integer, verbosity mode, 0 or 1.
+        start_epoch:   integer, epoch when swa should start.
+        lr_schedule:   string, type of learning rate schedule.
+        swa_lr:        float, learning rate for swa.
+        cyclic_max_lr: float, upper bound of cyclic learning rate.
+        swa_freq:      integer, length of learning rate cycle.
+        verbose:       integer, verbosity mode, 0 or 1.
     """
-    def __init__(self, start_epoch, lr_schedule=None, swa_lr=0.001, verbose=0):
+    def __init__(self, 
+                 start_epoch, 
+                 lr_schedule=None, 
+                 swa_lr=0.001, 
+                 cyclic_max_lr=0.003,
+                 swa_freq=3,
+                 verbose=0):
         
         super(SWA, self).__init__()
         self.start_epoch = start_epoch - 1
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
+        self.swa_freq = swa_freq
+        self.cyclic_max_lr = cyclic_max_lr
         self.verbose = verbose
         
         if start_epoch < 2:
             raise ValueError('"swa_start" attribute cannot be lower than 2.')
             
-        schedules = ['none', 'constant']
+        schedules = ['none', 'constant', 'cyclic']
         
         if self.lr_schedule is None:
             self.lr_schedule = 'none'
@@ -86,12 +93,12 @@ class SWA(Callback):
                 layer.momentum = momentum
                 
     def on_epoch_end(self, epoch, logs=None):
-        
+
         if epoch >= self.start_epoch and not self.running_bn_epoch:
-            self.swa_weights = [(swa_w * (epoch - self.start_epoch) + w)
-                                / ((epoch - self.start_epoch) + 1)
-                                        for swa_w, w in zip(self.swa_weights,
-                                                            self.model.get_weights())]
+            swa_epoch = (epoch - self.start_epoch)
+        
+            if self.lr_schedule != 'cyclic' or swa_epoch % self.swa_freq == 0:
+                self.swa_weights = self._average_weights(epoch)
 
     def on_train_end(self, logs=None):
         
@@ -99,6 +106,12 @@ class SWA(Callback):
             self._set_swa_weights(self.epochs - 1)
         else:
             self._restore_batch_norm()
+            
+    def _average_weights(self, epoch):
+        
+        return [(swa_w * (epoch - self.start_epoch) + w)
+                / ((epoch - self.start_epoch) + 1)
+                    for swa_w, w in zip(self.swa_weights, self.model.get_weights())]
 
     def _update_lr(self, epoch):  
         
@@ -106,6 +119,9 @@ class SWA(Callback):
             K.set_value(self.model.optimizer.lr, 0)
         elif self.lr_schedule == 'constant':
             lr = self._constant_schedule(epoch)
+            K.set_value(self.model.optimizer.lr, lr)
+        elif self.lr_schedule == 'cyclic':
+            lr = self._cyclic_schedule(epoch)
             K.set_value(self.model.optimizer.lr, lr)
 
     def _constant_schedule(self, epoch):
@@ -119,6 +135,17 @@ class SWA(Callback):
         else:
             factor = lr_ratio
         return self.init_lr * factor
+    
+    def _cyclic_schedule(self, epoch):
+        
+        swa_epoch = epoch - self.start_epoch
+        
+        if epoch >= self.start_epoch:
+            t = (((swa_epoch-1) % self.swa_freq)+1)/self.swa_freq
+            return (1-t)*self.cyclic_max_lr + t*self.swa_lr
+        else:
+            return self._constant_schedule(epoch)
+
     
     def _set_swa_weights(self, epoch):
         
