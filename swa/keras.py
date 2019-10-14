@@ -13,20 +13,20 @@ class SWA(Callback):
         link: https://arxiv.org/abs/1803.05407
 
     # Arguments
-        start_epoch: integer, epoch when swa should start.
-        lr_schedule: string, kind of learning rate schedule.
-                         None: optimizer or other scheduler handles learning rate.
-                        'constant': learning rate will start with "lr", ramp down to 
-                                    "swa_lr" and stay there.
-        swa_lr: float, minimum learning rate.
-        verbose: integer, verbosity mode, 0 or 1.
+        start_epoch:   integer, epoch when swa should start.
+        lr_schedule:   string, type of learning rate schedule.
+        swa_lr:        float, learning rate for swa.
+        batch_size:    integer, training batch size, not always required.
+        verbose:       integer, verbosity mode, 0 or 1.
     """
-    def __init__(self, start_epoch, lr_schedule=None, swa_lr=0.001, verbose=0):
+    def __init__(self, start_epoch, lr_schedule=None, 
+                 swa_lr=0.001, batch_size=None, verbose=0):
         
         super(SWA, self).__init__()
         self.start_epoch = start_epoch - 1
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
+        self.batch_size = batch_size
         self.verbose = verbose
         
         if start_epoch < 2:
@@ -44,7 +44,9 @@ class SWA(Callback):
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
-        self.batch_size = self.params.get('batch_size')
+        
+        if self.params.get('batch_size') is not None:
+            self.batch_size = self.params.get('batch_size')
         
         if self.start_epoch >= self.epochs - 1:
             raise ValueError('"swa_start" attribute must be lower than "epochs".')
@@ -55,6 +57,10 @@ class SWA(Callback):
             raise ValueError('"swa_lr" must be lower than rate set in optimizer.')
             
         self._check_batch_norm()
+        
+        if self.has_batch_norm and self.batch_size is None:
+            raise ValueError('"batch_size" has to be set manually for models with ' 
+                             'batch normalization when fitting with generators.')
 
     def on_epoch_begin(self, epoch, logs=None):
         
