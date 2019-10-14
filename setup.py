@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='keras-swa',
-    version='0.0.4',
+    version='0.0.5',
     description='Simple stochastic weight averaging callback for Keras.',
     long_description=long_description,
     long_description_content_type='text/markdown',
