@@ -16,7 +16,7 @@ class SWA(Callback):
         start_epoch:   integer, epoch when swa should start.
         lr_schedule:   string, type of learning rate schedule.
         swa_lr:        float, learning rate for swa.
-        cyclic_max_lr: float, upper bound of cyclic learning rate.
+        swa_lr2:       float, upper bound of cyclic learning rate.
         swa_freq:      integer, length of learning rate cycle.
         verbose:       integer, verbosity mode, 0 or 1.
     """
@@ -24,7 +24,7 @@ class SWA(Callback):
                  start_epoch, 
                  lr_schedule=None, 
                  swa_lr=0.001, 
-                 cyclic_max_lr=0.003,
+                 swa_lr2=0.003,
                  swa_freq=3,
                  verbose=0):
         
@@ -32,8 +32,8 @@ class SWA(Callback):
         self.start_epoch = start_epoch - 1
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
+        self.swa_lr2 = swa_lr2
         self.swa_freq = swa_freq
-        self.cyclic_max_lr = cyclic_max_lr
         self.verbose = verbose
         
         if start_epoch < 2:
@@ -142,7 +142,7 @@ class SWA(Callback):
         
         if epoch >= self.start_epoch:
             t = (((swa_epoch-1) % self.swa_freq)+1)/self.swa_freq
-            return (1-t)*self.cyclic_max_lr + t*self.swa_lr
+            return (1-t)*self.swa_lr2 + t*self.swa_lr
         else:
             return self._constant_schedule(epoch)
 
