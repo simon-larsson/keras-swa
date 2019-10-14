@@ -35,8 +35,6 @@ Keras callback object for SWA.
 
 **swa_lr** - Minimum learning rate for scheduler.
 
-**batch_size** - Training batch size, only required for models that use batch normalization when fit with a generator.
-
 **verbose** - Verbosity mode, 0 or 1.
 
 #### Example
