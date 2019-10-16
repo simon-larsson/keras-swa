@@ -70,7 +70,7 @@ class SWA(Callback):
             
             if self.verbose > 0:
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
-                      % (self.epochs))
+                      % (self.epochs + 1))
 
     def on_batch_begin(self, batch, logs=None):
         
