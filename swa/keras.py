@@ -16,14 +16,16 @@ class SWA(Callback):
         start_epoch:   integer, epoch when swa should start.
         lr_schedule:   string, type of learning rate schedule.
         swa_lr:        float, learning rate for swa.
+        batch_size     integer, batch size (only needed with batch normalization)
         verbose:       integer, verbosity mode, 0 or 1.
     """
-    def __init__(self, start_epoch, lr_schedule=None, swa_lr=0.001, verbose=0):
+    def __init__(self, start_epoch, lr_schedule=None, swa_lr=0.001, batch_size=None, verbose=0):
         
         super(SWA, self).__init__()
         self.start_epoch = start_epoch - 1
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
+        self.batch_size = batch_size
         self.verbose = verbose
         
         if start_epoch < 2:
@@ -52,6 +54,10 @@ class SWA(Callback):
             
         self._check_batch_norm()
 
+        if self.has_batch_norm and self.batch_size is None:
+            raise ValueError('"batch_size" needs to be set for the Keras API for '
+                             'models with batch normalization.')
+
     def on_epoch_begin(self, epoch, logs=None):
         
         self._update_lr(epoch)
@@ -70,13 +76,13 @@ class SWA(Callback):
             
             if self.verbose > 0:
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
-                      % (self.epochs))
+                      % (self.epochs + 1))
 
     def on_batch_begin(self, batch, logs=None):
         
         if self.running_bn_epoch:
             
-            batch_size = self.params.get('samples')
+            batch_size = self.batch_size
             
             momentum = batch_size / (batch*batch_size + batch_size)
 
