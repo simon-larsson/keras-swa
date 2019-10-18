@@ -35,9 +35,9 @@ Keras callback object for SWA.
 
 **swa_lr** - Learning rate used when averaging weights.
 
-**swa_lr2** - Upper bound of learning rate when using cyclic schedule.
+**swa_lr2** - Upper bound of learning rate for the cyclic schedule.
 
-**swa_freq** - Frequency of weight averagining for cyclic schedules.
+**swa_freq** - Frequency of weight averagining. Used with cyclic schedules.
 
 **batch_size** - Batch size. Only needed in the Keras API when using both batch normalization and a data generator.
 
