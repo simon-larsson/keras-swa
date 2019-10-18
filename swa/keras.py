@@ -54,6 +54,9 @@ class SWA(Callback):
         if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
             raise ValueError('"swa_freq" must be higher than 1.')
 
+        if self.lr_schedule == 'cyclic' and self.swa_lr > self.swa_lr2:
+            raise ValueError('"swa_lr" must be lower than "swa_lr2".')
+
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
