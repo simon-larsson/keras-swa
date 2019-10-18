@@ -18,6 +18,7 @@ class SWA(Callback):
         swa_lr:        float, learning rate for swa.
         swa_lr2:       float, upper bound of cyclic learning rate.
         swa_freq:      integer, length of learning rate cycle.
+        batch_size     integer, batch size (for batch norm with generator)
         verbose:       integer, verbosity mode, 0 or 1.
     """
     def __init__(self, 
@@ -25,7 +26,7 @@ class SWA(Callback):
                  lr_schedule=None, 
                  swa_lr=0.001, 
                  swa_lr2=0.003,
-                 swa_freq=3,
+                 swa_freq=1,
                  batch_size=None,
                  verbose=0):
         
@@ -50,6 +51,9 @@ class SWA(Callback):
             raise ValueError('"{}" is not a valid learning rate schedule' \
                              .format(self.lr_schedule))
 
+        if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
+            raise ValueError('"swa_freq" must be higher than 1.')
+
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
@@ -70,30 +74,29 @@ class SWA(Callback):
 
     def on_epoch_begin(self, epoch, logs=None):
         
-        self._update_lr(epoch)
+        self._scheduler(epoch)        
+        self._update_lr(epoch)       
 
-        if epoch == self.start_epoch:
+        if self.is_swa_start_epoch:
             self.swa_weights = self.model.get_weights()
-
+            
             if self.verbose > 0:
-                print('Epoch %05d: starting stochastic weight averaging'
+                print('\nEpoch %05d: starting stochastic weight averaging'
                       % (epoch + 1))
                 
-        if epoch == self.epochs - 1 and self.has_batch_norm:
+        if self.is_batch_norm_epoch:
             self._set_swa_weights(epoch)
             self._reset_batch_norm()
-            self.running_bn_epoch = True
             
             if self.verbose > 0:
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
-                      % (self.epochs + 1))
+                      % (epoch + 1))
 
     def on_batch_begin(self, batch, logs=None):
         
-        if self.running_bn_epoch:
+        if self.is_batch_norm_epoch:
             
-            batch_size = self.batch_size
-            
+            batch_size = self.batch_size      
             momentum = batch_size / (batch*batch_size + batch_size)
 
             for layer in self.batch_norm_layers:
@@ -101,28 +104,36 @@ class SWA(Callback):
                 
     def on_epoch_end(self, epoch, logs=None):
 
-        if epoch >= self.start_epoch and not self.running_bn_epoch:
-            swa_epoch = (epoch - self.start_epoch)
+        if self.is_swa_start_epoch:
+            self.swa_start_epoch = epoch
         
-            if self.lr_schedule != 'cyclic' or swa_epoch % self.swa_freq == 0:
-                self.swa_weights = self._average_weights(epoch)
+        if self.is_swa_epoch and not self.is_batch_norm_epoch:
+            self.swa_weights = self._average_weights(epoch)
 
     def on_train_end(self, logs=None):
         
         if not self.has_batch_norm:
-            self._set_swa_weights(self.epochs - 1)
+            self._set_swa_weights(self.epochs)
         else:
             self._restore_batch_norm()
-            
-    def _average_weights(self, epoch):
+    
+    def _scheduler(self, epoch):
         
+        swa_epoch = (epoch - self.start_epoch)
+        
+        self.is_swa_epoch = epoch >= self.start_epoch and swa_epoch % self.swa_freq == 0
+        self.is_swa_start_epoch = epoch == self.start_epoch
+        self.is_batch_norm_epoch = epoch == self.epochs - 1 and self.has_batch_norm
+    
+    def _average_weights(self, epoch):
+
         return [(swa_w * (epoch - self.start_epoch) + w)
                 / ((epoch - self.start_epoch) + 1)
                     for swa_w, w in zip(self.swa_weights, self.model.get_weights())]
 
     def _update_lr(self, epoch):  
         
-        if epoch == self.epochs - 1 and self.has_batch_norm:   
+        if self.is_batch_norm_epoch:
             K.set_value(self.model.optimizer.lr, 0)
         elif self.lr_schedule == 'constant':
             lr = self._constant_schedule(epoch)

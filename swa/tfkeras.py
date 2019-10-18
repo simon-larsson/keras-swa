@@ -48,6 +48,9 @@ class SWA(Callback):
             raise ValueError('"{}" is not a valid learning rate schedule' \
                              .format(self.lr_schedule))
 
+        if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
+            raise ValueError('"swa_freq" must be higher than 1.')
+
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
@@ -59,9 +62,6 @@ class SWA(Callback):
 
         if self.init_lr < self.swa_lr:
             raise ValueError('"swa_lr" must be lower than rate set in optimizer.')
-            
-        if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
-            raise ValueError('"swa_freq" must be higher than 1.')
             
         self._check_batch_norm()
 
