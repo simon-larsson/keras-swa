@@ -31,11 +31,15 @@ Keras callback object for SWA.
 #### Arguments
 **start_epoch** - Starting epoch for SWA.
 
-**lr_schedule** - Learning rate scheduler (optional),  `'constant'` for the non-cyclic scheduler from the paper.
+**lr_schedule** - Learning rate scheduler (optional),  `'constant'` or `'cyclic'` for predefined schedules.
 
-**swa_lr** - Minimum learning rate for scheduler.
+**swa_lr** - Learning rate used when averaging weights.
 
-**batch_size** - Batch size (Keras API only, automatic in TF-Keras).
+**swa_lr2** - Upper bound of learning rate when using cyclic schedule.
+
+**swa_freq** - Frequency of weight averagining for cyclic schedules.
+
+**batch_size** - Batch size. Only needed in the Keras API when using both batch normalization and a data generator.
 
 **verbose** - Verbosity mode, 0 or 1.
 
