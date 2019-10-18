@@ -26,6 +26,7 @@ class SWA(Callback):
                  swa_lr=0.001, 
                  swa_lr2=0.003,
                  swa_freq=3,
+                 batch_size=None,
                  verbose=0):
         
         super(SWA, self).__init__()
@@ -34,6 +35,7 @@ class SWA(Callback):
         self.swa_lr = swa_lr
         self.swa_lr2 = swa_lr2
         self.swa_freq = swa_freq
+        self.batch_size = batch_size
         self.verbose = verbose
         
         if start_epoch < 2:
@@ -51,7 +53,6 @@ class SWA(Callback):
     def on_train_begin(self, logs=None):
         
         self.epochs = self.params.get('epochs')
-        self.batch_size = self.params.get('batch_size')
         
         if self.start_epoch >= self.epochs - 1:
             raise ValueError('"swa_start" attribute must be lower than "epochs".')
@@ -62,6 +63,10 @@ class SWA(Callback):
             raise ValueError('"swa_lr" must be lower than rate set in optimizer.')
             
         self._check_batch_norm()
+
+        if self.has_batch_norm and self.batch_size is None:
+            raise ValueError('"batch_size" needs to be set for the Keras API for '
+                             'models with batch normalization.')
 
     def on_epoch_begin(self, epoch, logs=None):
         
@@ -81,13 +86,15 @@ class SWA(Callback):
             
             if self.verbose > 0:
                 print('\nEpoch %05d: running forward pass to adjust batch normalization'
-                      % (self.epochs))
+                      % (self.epochs + 1))
 
     def on_batch_begin(self, batch, logs=None):
         
         if self.running_bn_epoch:
             
-            momentum = self.batch_size / (batch*self.batch_size + self.batch_size)
+            batch_size = self.batch_size
+            
+            momentum = batch_size / (batch*batch_size + batch_size)
 
             for layer in self.batch_norm_layers:
                 layer.momentum = momentum

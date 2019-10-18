@@ -35,6 +35,8 @@ Keras callback object for SWA.
 
 **swa_lr** - Minimum learning rate for scheduler.
 
+**batch_size** - Batch size (Keras API only, automatic in TF-Keras).
+
 **verbose** - Verbosity mode, 0 or 1.
 
 #### Example
