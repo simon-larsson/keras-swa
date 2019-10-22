@@ -20,11 +20,7 @@ Stochastic weight averaging (SWA) is build upon the same principle as [snapshot 
 
     pip install keras-swa
 
-
-## Batch Normalization
-Last epoch will be a forward pass, i.e. have learning rate set to zero, for models with batch normalization. This is due to the fact that batch normalization uses the running mean and variance of it's preceding layer to make a normalization. SWA will offset this normalization by suddenly changing the weights in the end of training. Therefore, it is necessary for the last epoch to be used to reset and recalculate batch normalization for the updated weights.
-
-### SWA
+### SWA API
 
 Keras callback object for SWA.  
 
@@ -42,6 +38,15 @@ Keras callback object for SWA.
 **batch_size** - Batch size. Only needed in the Keras API when using both batch normalization and a data generator.
 
 **verbose** - Verbosity mode, 0 or 1.
+
+## Batch Normalization
+Last epoch will be a forward pass, i.e. have learning rate set to zero, for models with batch normalization. This is due to the fact that batch normalization uses the running mean and variance of it's preceding layer to make a normalization. SWA will offset this normalization by suddenly changing the weights in the end of training. Therefore, it is necessary for the last epoch to be used to reset and recalculate batch normalization for the updated weights.
+
+## Learning Rate Schedules
+The default schedule is `'manual'`, allowing the learning rate to be controlled by an external learning rate scheduler or the optimizer. Then SWA will only affect the final weights and the learning rate of the last epoch if batch normalization is used. The schedules for the two predefined, `'constant'` or `'cyclic'` can be observed below.
+
+[![lr_schedules](https://raw.githubusercontent.com/simon-larsson/keras-swa/master/lr_schedules.png)](https://raw.githubusercontent.com/simon-larsson/keras-swa/master/lr_schedules.png)
+
 
 #### Example
 
