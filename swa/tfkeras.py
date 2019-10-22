@@ -46,7 +46,7 @@ class SWA(Callback):
                              .format(self.lr_schedule))
 
         if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
-            raise ValueError('"swa_freq" must be higher than 1.')
+            raise ValueError('"swa_freq" must be higher than 1 for cyclic schedule.')
 
         if self.lr_schedule == 'cyclic' and self.swa_lr > self.swa_lr2:
             raise ValueError('"swa_lr" must be lower than "swa_lr2".')
