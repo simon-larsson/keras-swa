@@ -22,7 +22,7 @@ Stochastic weight averaging (SWA) is build upon the same principle as [snapshot 
 
 
 ## Batch Normalization
-Last epoch will be a forward pass, i.e. have learning rate set to zero, for models with batch normalization. This is due to the fact that batch normalization uses the running mean and variance of it's preceding layer to make a normalization. SWA will offset this normalization by suddenly changing the weights in the end of training. Therefore it is necessary for the last epoch to be used to reset and recalculate batch normalization for the updated weights.
+Last epoch will be a forward pass, i.e. have learning rate set to zero, for models with batch normalization. This is due to the fact that batch normalization uses the running mean and variance of it's preceding layer to make a normalization. SWA will offset this normalization by suddenly changing the weights in the end of training. Therefore, it is necessary for the last epoch to be used to reset and recalculate batch normalization for the updated weights.
 
 ### SWA
 
@@ -31,7 +31,7 @@ Keras callback object for SWA.
 #### Arguments
 **start_epoch** - Starting epoch for SWA.
 
-**lr_schedule** - Learning rate scheduler (optional),  `'constant'` or `'cyclic'` for predefined schedules.
+**lr_schedule** - Learning rate schedule. `'manual'` , `'constant'` or `'cyclic'`.
 
 **swa_lr** - Learning rate used when averaging weights.
 
