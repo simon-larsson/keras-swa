@@ -22,7 +22,7 @@ class SWA(Callback):
     """
     def __init__(self, 
                  start_epoch, 
-                 lr_schedule=None, 
+                 lr_schedule='manual', 
                  swa_lr=0.001, 
                  swa_lr2=0.003,
                  swa_freq=1,
@@ -39,10 +39,7 @@ class SWA(Callback):
         if start_epoch < 2:
             raise ValueError('"swa_start" attribute cannot be lower than 2.')
             
-        schedules = ['none', 'constant', 'cyclic']
-        
-        if self.lr_schedule is None:
-            self.lr_schedule = 'none'
+        schedules = ['manual', 'constant', 'cyclic']
         
         if self.lr_schedule not in schedules:
             raise ValueError('"{}" is not a valid learning rate schedule' \
