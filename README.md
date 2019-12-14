@@ -153,3 +153,7 @@ Epoch 100/100
 
 Epoch 00100: final model weights set to stochastic weight average
 ```
+
+### Contributions
+
+[Alex Stoken](https://github.com/alexstoken "Github"): Found and fixed a bug with the reinitialization of batch normalization layers.
