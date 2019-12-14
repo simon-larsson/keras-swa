@@ -88,7 +88,9 @@ class SWA(Callback):
             self._set_swa_weights(epoch)
 
             if self.verbose > 0:
-                print('\nReinitializing batch normalization layers. This may take a moment.')
+                print('\nEpoch %05d: reinitializing batch normalization layers' 
+                    % (epoch + 1))
+            
             self._reset_batch_norm()
             
             if self.verbose > 0:
@@ -196,23 +198,22 @@ class SWA(Callback):
     def _reset_batch_norm(self):
         
         for layer in self.batch_norm_layers:
-            shape = (list(layer.input_spec.axes.values())[0],)
 
-            #to get properly initialized moving mean and moving variance weights
-            #we initialize a new batch norm layer from the config of the existing
-            #layer, build that layer, retrieve its reinitialized moving mean and 
-            #moving var weights and then delete the layer
+            # to get properly initialized moving mean and moving variance weights
+            # we initialize a new batch norm layer from the config of the existing
+            # layer, build that layer, retrieve its reinitialized moving mean and 
+            # moving var weights and then delete the layer
             new_batch_norm = BatchNormalization(**layer.get_config())
             new_batch_norm.build(layer.input_shape)
-            new_gamma, new_beta, new_moving_mean, new_moving_var = new_batch_norm.get_weights()
+            _, _, new_moving_mean, new_moving_var = new_batch_norm.get_weights()
 
-            #get rid of the new_batch_norm layer
+            # get rid of the new_batch_norm layer
             del new_batch_norm
 
-            #get the trained gamma and beta from the current batch norm layer
-            trained_gamma, trained_beta, trained_moving_mean, trained_moving_var = layer.get_weights()
+            # get the trained gamma and beta from the current batch norm layer
+            trained_gamma, trained_beta, _, _ = layer.get_weights()
 
-            #set weights to trained gamma and beta, reinitialized (new) mean and variance
+            # set weights to trained gamma and beta, reinitialized mean and variance
             layer.set_weights([trained_gamma, trained_beta,
                                new_moving_mean, new_moving_var])
           
