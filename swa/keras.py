@@ -173,17 +173,19 @@ class SWA(Callback):
         return self.init_lr * factor
 
     def _cyclic_schedule(self, epoch, batch):
+        """Designed after Section 3.1 of Averaging Weights Leads to
+        Wider Optima and Better Generalization(https://arxiv.org/abs/1803.05407)
+        """
+        #mini-batches per epoch, equal to training_samples / batch_size
+        steps = self.params.get('steps') 
 
-        
-        steps = self.params.get('steps')
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq
         cycle_length = self.swa_freq * steps
 
-        i = (swa_epoch * steps) + (batch + 1)
+        i = (swa_epoch * steps) + (batch + 1) #batch 0 indexed, so need to add 1
         if epoch >= self.start_epoch:
-            t = (((i-1) % cycle_length) + 1)/cycle_length
 
-           
+            t = (((i-1) % cycle_length) + 1)/cycle_length
             return (1-t)*self.swa_lr2 + t*self.swa_lr
         else:
             return self._constant_schedule(epoch)
