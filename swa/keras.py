@@ -105,7 +105,7 @@ class SWA(Callback):
 
     def on_batch_begin(self, batch, logs=None):
 
-        #print(f'\n{batch}\n')
+        
         if self.lr_schedule == 'cyclic':
             self._update_lr(self.current_epoch, batch)
 
@@ -123,7 +123,8 @@ class SWA(Callback):
             self.swa_start_epoch = epoch
 
         if self.is_swa_epoch and not self.is_batch_norm_epoch:
-            print('\nWeights being added to SWA.\n')
+            if self.verbose >0: 
+                print('\nWeights being added to SWA.\n')
             self.swa_weights = self._average_weights(epoch)
 
     def on_train_end(self, logs=None):
@@ -173,7 +174,7 @@ class SWA(Callback):
 
     def _cyclic_schedule(self, epoch, batch):
 
-        #print(batch)
+        
         steps = self.params.get('steps')
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq
         cycle_length = self.swa_freq * steps
@@ -182,7 +183,7 @@ class SWA(Callback):
         if epoch >= self.start_epoch:
             t = (((i-1) % cycle_length) + 1)/cycle_length
 
-            #print(f'swa_epoch: {swa_epoch} i:{i} cycle_len:{cycle_length} t:{t} batch:{batch} epoch:{epoch}')
+           
             return (1-t)*self.swa_lr2 + t*self.swa_lr
         else:
             return self._constant_schedule(epoch)
