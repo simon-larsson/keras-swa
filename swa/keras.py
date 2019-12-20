@@ -58,6 +58,8 @@ class SWA(Callback):
             raise ValueError('"swa_lr" must be lower than "swa_lr2".')
 
     def on_train_begin(self, logs=None):
+
+        #store LR data to be added to model.history object in on_train_end()
         self.lr_record = []
         self.epochs = self.params.get('epochs')
 
@@ -79,12 +81,11 @@ class SWA(Callback):
 
     def on_epoch_begin(self, epoch, logs=None):
 
+        self.current_epoch = epoch
         self._scheduler(epoch)
 
         if self.lr_schedule != 'cyclic':
             self._update_lr(epoch)
-        self.current_epoch = epoch
-
         if self.is_swa_start_epoch:
             self.swa_weights = self.model.get_weights()
 
@@ -105,7 +106,6 @@ class SWA(Callback):
 
     def on_batch_begin(self, batch, logs=None):
 
-        
         if self.lr_schedule == 'cyclic':
             self._update_lr(self.current_epoch, batch)
 
@@ -118,7 +118,7 @@ class SWA(Callback):
                 layer.momentum = momentum
 
     def on_epoch_end(self, epoch, logs=None):
-
+        
         if self.is_swa_start_epoch:
             self.swa_start_epoch = epoch
 
@@ -133,6 +133,9 @@ class SWA(Callback):
             self._set_swa_weights(self.epochs)
         else:
             self._restore_batch_norm()
+        
+        for batch_lr in self.lr_record:
+            self.model.history.history.setdefault('lr', []).append(batch_lr)
 
     def _scheduler(self, epoch):
 
@@ -151,14 +154,15 @@ class SWA(Callback):
     def _update_lr(self, epoch, batch=None):
 
         if self.is_batch_norm_epoch:
-            K.set_value(self.model.optimizer.lr, 0)
+            lr = 0
+            K.set_value(self.model.optimizer.lr, lr)
         elif self.lr_schedule == 'constant':
             lr = self._constant_schedule(epoch)
             K.set_value(self.model.optimizer.lr, lr)
         elif self.lr_schedule == 'cyclic':
             lr = self._cyclic_schedule(epoch, batch)
-            self.lr_record.append(lr)
             K.set_value(self.model.optimizer.lr, lr)
+        self.lr_record.append(lr)
 
     def _constant_schedule(self, epoch):
 
@@ -176,7 +180,7 @@ class SWA(Callback):
         """Designed after Section 3.1 of Averaging Weights Leads to
         Wider Optima and Better Generalization(https://arxiv.org/abs/1803.05407)
         """
-        #mini-batches per epoch, equal to training_samples / batch_size
+        #steps are mini-batches per epoch, equal to training_samples / batch_size
         steps = self.params.get('steps') 
 
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq
