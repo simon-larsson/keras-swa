@@ -79,6 +79,11 @@ class SWA(Callback):
                 
         if self.is_batch_norm_epoch:
             self._set_swa_weights(epoch)
+
+            if self.verbose > 0:
+                print('\nEpoch %05d: reinitializing batch normalization layers' 
+                    % (epoch + 1))
+
             self._reset_batch_norm()
             
             if self.verbose > 0:
@@ -185,19 +190,24 @@ class SWA(Callback):
     def _reset_batch_norm(self):
         
         for layer in self.batch_norm_layers:
-            shape = (list(layer.input_spec.axes.values())[0],)
 
-            layer.moving_mean = layer.add_weight(
-                shape=shape,
-                name='moving_mean',
-                initializer=layer.moving_mean_initializer,
-                trainable=layer.moving_mean.trainable)
-            
-            layer.moving_variance = layer.add_weight(
-                shape=shape,
-                name='moving_variance',
-                initializer=layer.moving_variance_initializer,
-                trainable=layer.moving_variance.trainable)
+            # to get properly initialized moving mean and moving variance weights
+            # we initialize a new batch norm layer from the config of the existing
+            # layer, build that layer, retrieve its reinitialized moving mean and 
+            # moving var weights and then delete the layer
+            new_batch_norm = BatchNormalization(**layer.get_config())
+            new_batch_norm.build(layer.input_shape)
+            _, _, new_moving_mean, new_moving_var = new_batch_norm.get_weights()
+
+            # get rid of the new_batch_norm layer
+            del new_batch_norm
+
+            # get the trained gamma and beta from the current batch norm layer
+            trained_gamma, trained_beta, _, _ = layer.get_weights()
+
+            # set weights to trained gamma and beta, reinitialized mean and variance
+            layer.set_weights([trained_gamma, trained_beta,
+                               new_moving_mean, new_moving_var])
           
     def _restore_batch_norm(self):
         
