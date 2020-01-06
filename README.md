@@ -50,7 +50,7 @@ The default schedule is `'manual'`, allowing the learning rate to be controlled 
 
 #### Example
 
-For Keras
+For Keras (with constant LR)
 ```python
 from sklearn.datasets.samples_generator import make_blobs
 from keras.utils import to_categorical
@@ -90,7 +90,7 @@ swa = SWA(start_epoch=start_epoch,
 model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
 ```
 
-Or for Keras in Tensorflow
+Or for Keras in Tensorflow (with Cyclic LR)
 
 ```python
 from sklearn.datasets.samples_generator import make_blobs
@@ -123,8 +123,10 @@ start_epoch = 75
 
 # define swa callback
 swa = SWA(start_epoch=start_epoch, 
-          lr_schedule='constant', 
-          swa_lr=0.01, 
+          lr_schedule='cyclic', 
+          swa_lr=0.001,
+          swa_lr2=0.003,
+          swa_freq=3,
           verbose=1)
 
 # train
@@ -134,24 +136,25 @@ model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
 Output
 ```
 Epoch 1/100
-1000/1000 [==============================] - 1s 703us/step - loss: 0.7518
+1000/1000 [==============================] - 1s 605us/sample - loss: 0.7635
 Epoch 2/100
-1000/1000 [==============================] - 0s 47us/step - loss: 0.5997
+1000/1000 [==============================] - 0s 94us/sample - loss: 0.6268
 ...
 Epoch 74/100
-1000/1000 [==============================] - 0s 31us/step - loss: 0.3913
-Epoch 75/100
+1000/1000 [==============================] - 0s 92us/sample - loss: 0.3902
+
 Epoch 00075: starting stochastic weight averaging
-1000/1000 [==============================] - 0s 202us/step - loss: 0.3907
+Epoch 75/100
+1000/1000 [==============================] - 0s 94us/sample - loss: 0.3905
 Epoch 76/100
-1000/1000 [==============================] - 0s 47us/step - loss: 0.3911
+1000/1000 [==============================] - 0s 94us/sample - loss: 0.3904
 ...
 Epoch 99/100
-1000/1000 [==============================] - 0s 31us/step - loss: 0.3910
+1000/1000 [==============================] - 0s 94us/sample - loss: 0.3904
 Epoch 100/100
-1000/1000 [==============================] - 0s 47us/step - loss: 0.3905
+1000/1000 [==============================] - 0s 93us/sample - loss: 0.3903
 
-Epoch 00100: final model weights set to stochastic weight average
+Epoch 00101: final model weights set to stochastic weight average
 ```
 
 ### Contributions
