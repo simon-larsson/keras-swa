@@ -84,8 +84,10 @@ class SWA(Callback):
         self.current_epoch = epoch
         self._scheduler(epoch)
 
+        #update lr each epoch for non-cyclic LR schedules
         if self.lr_schedule != 'cyclic':
             self._update_lr(epoch)
+
         if self.is_swa_start_epoch:
             self.swa_weights = self.model.get_weights()
 
@@ -106,6 +108,7 @@ class SWA(Callback):
 
     def on_batch_begin(self, batch, logs=None):
 
+        #update LR each batch for cyclic LR schedule
         if self.lr_schedule == 'cyclic':
             self._update_lr(self.current_epoch, batch)
 
