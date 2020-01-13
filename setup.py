@@ -1,11 +1,12 @@
 from setuptools import setup, find_packages
+import swa
 
 with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
     name='keras-swa',
-    version='0.1.3',
+    version=swa.__version__,
     description='Simple stochastic weight averaging callback for Keras.',
     long_description=long_description,
     long_description_content_type='text/markdown',
