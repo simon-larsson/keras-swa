@@ -31,7 +31,7 @@ class SWA(Callback):
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
 
-        #if no user determined upper bound, make one based off of the lower bound
+        # if no user determined upper bound, make one based off of the lower bound
         self.swa_lr2 = (swa_lr2 if swa_lr2 != None else 10*swa_lr)
         self.swa_freq = swa_freq
         self.verbose = verbose
@@ -53,7 +53,6 @@ class SWA(Callback):
 
     def on_train_begin(self, logs=None):
 
-        #store LR data to be added to model.history object in on_train_end()
         self.epochs = self.params.get('epochs')
 
         if self.start_epoch >= self.epochs - 1:
@@ -71,7 +70,7 @@ class SWA(Callback):
         self.current_epoch = epoch
         self._scheduler(epoch)
 
-        #update lr each epoch for non-cyclic LR schedules
+        # update lr each epoch for non-cyclic lr schedules
         if self.lr_schedule != 'cyclic':
             self._update_lr(epoch)
 
@@ -97,7 +96,7 @@ class SWA(Callback):
 
     def on_batch_begin(self, batch, logs=None):
 
-        #update LR each batch for cyclic LR schedule
+        # update lr each batch for cyclic lr schedule
         if self.lr_schedule == 'cyclic':
             self._update_lr(self.current_epoch, batch)
 
@@ -170,10 +169,10 @@ class SWA(Callback):
         return self.init_lr * factor
 
     def _cyclic_schedule(self, epoch, batch):
-        """Designed after Section 3.1 of Averaging Weights Leads to
+        """ Designed after Section 3.1 of Averaging Weights Leads to
         Wider Optima and Better Generalization(https://arxiv.org/abs/1803.05407)
         """
-        #steps are mini-batches per epoch, equal to training_samples / batch_size
+        # steps are mini-batches per epoch, equal to training_samples / batch_size
         steps = self.params.get('steps')
 
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq

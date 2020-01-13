@@ -35,7 +35,7 @@ class SWA(Callback):
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
 
-        #if no user determined upper bound, make one based off of the lower bound
+        # if no user determined upper bound, make one based off of the lower bound
         self.swa_lr2 = (swa_lr2 if swa_lr2 != None else 10*swa_lr)
         self.swa_freq = swa_freq
         self.batch_size = batch_size
@@ -51,15 +51,14 @@ class SWA(Callback):
                              .format(self.lr_schedule))
 
         if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
-            raise ValueError(
-                '"swa_freq" must be higher than 1 for cyclic schedule.')
+            raise ValueError('"swa_freq" must be higher than 1 for cyclic schedule.')
 
         if self.lr_schedule == 'cyclic' and self.swa_lr > self.swa_lr2:
             raise ValueError('"swa_lr" must be lower than "swa_lr2".')
 
     def on_train_begin(self, logs=None):
 
-        #store LR data to be added to model.history object in on_train_end()
+        # store lr data to be added to model.history object in on_train_end()
         self.lr_record = []
         self.epochs = self.params.get('epochs')
 
@@ -110,7 +109,7 @@ class SWA(Callback):
 
     def on_batch_begin(self, batch, logs=None):
 
-        #update LR each batch for cyclic LR schedule
+        # update lr each batch for cyclic lr schedule
         if self.lr_schedule == 'cyclic':
             self._update_lr(self.current_epoch, batch)
 
@@ -182,16 +181,17 @@ class SWA(Callback):
         return self.init_lr * factor
 
     def _cyclic_schedule(self, epoch, batch):
-        """Designed after Section 3.1 of Averaging Weights Leads to
+        """ Designed after Section 3.1 of Averaging Weights Leads to
         Wider Optima and Better Generalization(https://arxiv.org/abs/1803.05407)
         """
-        #steps are mini-batches per epoch, equal to training_samples / batch_size
+        # steps are mini-batches per epoch, equal to training_samples / batch_size
         steps = self.params.get('steps') 
 
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq
         cycle_length = self.swa_freq * steps
 
-        i = (swa_epoch * steps) + (batch + 1) #batch 0 indexed, so need to add 1
+        # batch 0 indexed, so need to add 1
+        i = (swa_epoch * steps) + (batch + 1)
         if epoch >= self.start_epoch:
 
             t = (((i-1) % cycle_length) + 1)/cycle_length
