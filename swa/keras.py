@@ -58,7 +58,6 @@ class SWA(Callback):
 
     def on_train_begin(self, logs=None):
 
-        # store lr data to be added to model.history object in on_train_end()
         self.lr_record = []
         self.epochs = self.params.get('epochs')
 
@@ -83,7 +82,7 @@ class SWA(Callback):
         self.current_epoch = epoch
         self._scheduler(epoch)
 
-        #update lr each epoch for non-cyclic LR schedules
+        # update lr each epoch for non-cyclic lr schedules
         if self.lr_schedule != 'cyclic':
             self._update_lr(epoch)
 
