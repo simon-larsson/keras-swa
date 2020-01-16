@@ -21,8 +21,8 @@ class SWA(Callback):
     def __init__(self,
                  start_epoch,
                  lr_schedule='manual',
-                 swa_lr=0.001,
-                 swa_lr2=None,
+                 swa_lr='auto',
+                 swa_lr2='auto',
                  swa_freq=1,
                  verbose=0):
                  
@@ -30,9 +30,7 @@ class SWA(Callback):
         self.start_epoch = start_epoch - 1
         self.lr_schedule = lr_schedule
         self.swa_lr = swa_lr
-
-        # if no user determined upper bound, make one based off of the lower bound
-        self.swa_lr2 = (swa_lr2 if swa_lr2 != None else 10*swa_lr)
+        self.swa_lr2 = swa_lr2
         self.swa_freq = swa_freq
         self.verbose = verbose
 
@@ -48,7 +46,11 @@ class SWA(Callback):
         if self.lr_schedule == 'cyclic' and self.swa_freq < 2:
             raise ValueError('"swa_freq" must be higher than 1 for cyclic schedule.')
 
-        if self.lr_schedule == 'cyclic' and self.swa_lr > self.swa_lr2:
+        if self.swa_lr == 'auto' and self.swa_lr2 != 'auto':
+            raise ValueError('"swa_lr2" cannot be manually set if "swa_lr" is automatic.') 
+            
+        if self.lr_schedule == 'cyclic' and self.swa_lr != 'auto' \
+           and self.swa_lr2 != 'auto' and self.swa_lr > self.swa_lr2:
             raise ValueError('"swa_lr" must be lower than "swa_lr2".')
 
     def on_train_begin(self, logs=None):
@@ -58,10 +60,18 @@ class SWA(Callback):
         if self.start_epoch >= self.epochs - 1:
             raise ValueError('"swa_start" attribute must be lower than "epochs".')
 
-        self.init_lr = K.get_value(self.model.optimizer.lr)
+        self.init_lr = K.eval(self.model.optimizer.lr)
 
+        # automatic swa_lr
+        if self.swa_lr == 'auto':
+            self.swa_lr = 0.1*self.init_lr
+        
         if self.init_lr < self.swa_lr:
             raise ValueError('"swa_lr" must be lower than rate set in optimizer.')
+
+        # automatic swa_lr2 between initial lr and swa_lr   
+        if self.lr_schedule == 'cyclic' and self.swa_lr2 == 'auto':
+            self.swa_lr2 = self.swa_lr + (self.init_lr - self.swa_lr)*0.25
 
         self._check_batch_norm()
 
@@ -70,8 +80,8 @@ class SWA(Callback):
         self.current_epoch = epoch
         self._scheduler(epoch)
 
-        # update lr each epoch for non-cyclic lr schedules
-        if self.lr_schedule != 'cyclic':
+        # constant schedule is updated epoch-wise
+        if self.lr_schedule == 'constant' or self.is_batch_norm_epoch:
             self._update_lr(epoch)
 
         if self.is_swa_start_epoch:
