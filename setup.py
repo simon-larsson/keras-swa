@@ -12,7 +12,7 @@ setup(
     long_description_content_type='text/markdown',
     packages=find_packages(),
     author='Simon Larsson',
-    author_email='simonlarsson0@gmail.com',
+    author_email='larssonsimon0@gmail.com',
     url='https://github.com/simon-larsson/keras-swa',
     license='MIT',
     install_requires=[],
