@@ -3,10 +3,6 @@
 [![PyPI version](https://badge.fury.io/py/keras-swa.svg)](https://pypi.python.org/pypi/keras-swa/) 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/simon-larsson/keras-swa/blob/master/LICENSE)
 
-[![PWC ImageNet](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/averaging-weights-leads-to-wider-optima-and/image-classification-imagenet-image-reco)](https://paperswithcode.com/sota/image-classification-imagenet-image-reco?p=averaging-weights-leads-to-wider-optima-and)
-[![PWC CIFAR-100](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/averaging-weights-leads-to-wider-optima-and/image-classification-on-cifar-100)](https://paperswithcode.com/sota/image-classification-on-cifar-100?p=averaging-weights-leads-to-wider-optima-and)
-[![PWC CIFAR-10](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/averaging-weights-leads-to-wider-optima-and/image-classification-on-cifar-10)](https://paperswithcode.com/sota/image-classification-on-cifar-10?p=averaging-weights-leads-to-wider-optima-and)
-
 This is an implemention of SWA for Keras and TF-Keras.
 
 ## Introduction
