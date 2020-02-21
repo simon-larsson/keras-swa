@@ -195,6 +195,10 @@ class SWA(Callback):
         # steps are mini-batches per epoch, equal to training_samples / batch_size
         steps = self.params.get('steps') 
 
+        #occasionally steps parameter will not be set. We then calculate it ourselves
+        if steps == None:
+            steps = self.params['samples'] // self.params['batch_size']
+            
         swa_epoch = (epoch - self.start_epoch) % self.swa_freq
         cycle_length = self.swa_freq * steps
 
