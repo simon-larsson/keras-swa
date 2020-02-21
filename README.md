@@ -77,7 +77,7 @@ model.add(Dense(50, input_dim=2, activation='relu'))
 model.add(Dense(3, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', 
-              optimizer=SGD(learning_rate=0.1))
+              optimizer=SGD(lr=0.1))
 
 epochs = 100
 start_epoch = 75
@@ -137,26 +137,31 @@ model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
 
 Output
 ```
+Model uses batch normalization. SWA will require last epoch to be a forward pass and will run with no learning rate
 Epoch 1/100
-1000/1000 [==============================] - 1s 605us/sample - loss: 0.7635
+1000/1000 [==============================] - 1s 547us/sample - loss: 0.5529
 Epoch 2/100
-1000/1000 [==============================] - 0s 94us/sample - loss: 0.6268
+1000/1000 [==============================] - 0s 160us/sample - loss: 0.4720
 ...
 Epoch 74/100
-1000/1000 [==============================] - 0s 92us/sample - loss: 0.3902
+1000/1000 [==============================] - 0s 160us/sample - loss: 0.4249
 
 Epoch 00075: starting stochastic weight averaging
 Epoch 75/100
-1000/1000 [==============================] - 0s 94us/sample - loss: 0.3905
+1000/1000 [==============================] - 0s 164us/sample - loss: 0.4357
 Epoch 76/100
-1000/1000 [==============================] - 0s 94us/sample - loss: 0.3904
+1000/1000 [==============================] - 0s 165us/sample - loss: 0.4209
 ...
 Epoch 99/100
-1000/1000 [==============================] - 0s 94us/sample - loss: 0.3904
-Epoch 100/100
-1000/1000 [==============================] - 0s 93us/sample - loss: 0.3903
+1000/1000 [==============================] - 0s 167us/sample - loss: 0.4263
 
-Epoch 00101: final model weights set to stochastic weight average
+Epoch 00100: final model weights set to stochastic weight average
+
+Epoch 00100: reinitializing batch normalization layers
+
+Epoch 00100: running forward pass to adjust batch normalization
+Epoch 100/100
+1000/1000 [==============================] - 0s 166us/sample - loss: 0.4408
 ```
 
 ### Collaborators
