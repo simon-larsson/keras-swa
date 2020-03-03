@@ -98,7 +98,7 @@ Or for Keras in Tensorflow (with Cyclic LR)
 from sklearn.datasets.samples_generator import make_blobs
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Dense, BatchNormalization
 from tensorflow.keras.optimizers import SGD
 
 from swa.tfkeras import SWA
@@ -115,6 +115,7 @@ y = to_categorical(y)
 # build model
 model = Sequential()
 model.add(Dense(50, input_dim=2, activation='relu'))
+model.add(BatchNormalization())
 model.add(Dense(3, activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', 
