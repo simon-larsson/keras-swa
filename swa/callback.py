@@ -1,9 +1,9 @@
 """ SWA Callback
 """
 
+
 def create_swa_callback_class(K, Callback, BatchNormalization):
-    """Injecting library dependencies
-    """
+    """Injecting library dependencies"""
 
     class SWA(Callback):
         """Stochastic Weight Averging.
@@ -23,14 +23,14 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
         """
 
         def __init__(
-                self,
-                start_epoch,
-                lr_schedule="manual",
-                swa_lr="auto",
-                swa_lr2="auto",
-                swa_freq=1,
-                batch_size=None,
-                verbose=0,
+            self,
+            start_epoch,
+            lr_schedule="manual",
+            swa_lr="auto",
+            swa_lr2="auto",
+            swa_freq=1,
+            batch_size=None,
+            verbose=0,
         ):
 
             super(SWA, self).__init__()
@@ -51,11 +51,15 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
             if self.lr_schedule not in schedules:
                 raise ValueError(
-                    '"{}" is not a valid learning rate schedule'.format(self.lr_schedule)
+                    '"{}" is not a valid learning rate schedule'.format(
+                        self.lr_schedule
+                    )
                 )
 
             if self.lr_schedule == "cyclic" and self.swa_freq < 2:
-                raise ValueError('"swa_freq" must be higher than 1 for cyclic schedule.')
+                raise ValueError(
+                    '"swa_freq" must be higher than 1 for cyclic schedule.'
+                )
 
             if self.swa_lr == "auto" and self.swa_lr2 != "auto":
                 raise ValueError(
@@ -63,10 +67,10 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
                 )
 
             if (
-                    self.lr_schedule == "cyclic"
-                    and self.swa_lr != "auto"
-                    and self.swa_lr2 != "auto"
-                    and self.swa_lr > self.swa_lr2
+                self.lr_schedule == "cyclic"
+                and self.swa_lr != "auto"
+                and self.swa_lr2 != "auto"
+                and self.swa_lr > self.swa_lr2
             ):
                 raise ValueError('"swa_lr" must be lower than "swa_lr2".')
 
@@ -95,8 +99,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
             if self.has_batch_norm and self.batch_size is None:
                 raise ValueError(
-                    '"batch_size" needs to be set for the Keras API for '
-                    "models with batch normalization."
+                    '"batch_size" needs to be set for models with batch normalization.'
                 )
 
         def on_epoch_begin(self, epoch, logs=None):
@@ -113,7 +116,8 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
                 if self.verbose > 0:
                     print(
-                        "\nEpoch %05d: starting stochastic weight averaging" % (epoch + 1)
+                        "\nEpoch %05d: starting stochastic weight averaging"
+                        % (epoch + 1)
                     )
 
             if self.is_batch_norm_epoch:
@@ -169,7 +173,9 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
             swa_epoch = epoch - self.start_epoch
 
-            self.is_swa_epoch = epoch >= self.start_epoch and swa_epoch % self.swa_freq == 0
+            self.is_swa_epoch = (
+                epoch >= self.start_epoch and swa_epoch % self.swa_freq == 0
+            )
             self.is_swa_start_epoch = epoch == self.start_epoch
             self.is_batch_norm_epoch = epoch == self.epochs - 1 and self.has_batch_norm
 
@@ -287,7 +293,9 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
         def _restore_batch_norm(self):
 
-            for layer, momentum in zip(self.batch_norm_layers, self.batch_norm_momentums):
+            for layer, momentum in zip(
+                self.batch_norm_layers, self.batch_norm_momentums
+            ):
                 layer.momentum = momentum
 
     return SWA
