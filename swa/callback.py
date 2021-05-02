@@ -99,7 +99,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
             if self.has_batch_norm and self.batch_size is None:
                 raise ValueError(
-                    '"batch_size" needs to be set for models with batch normalization.'
+                    '"batch_size" needs to be set for models with batch normalization layers.'
                 )
 
         def on_epoch_begin(self, epoch, logs=None):
