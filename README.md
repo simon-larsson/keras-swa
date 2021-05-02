@@ -35,7 +35,7 @@ Keras callback object for SWA.
 
 **swa_freq** - Frequency of weight averagining. Used with cyclic schedules.
 
-**batch_size** - Batch size. Only needed in the Keras API when using both batch normalization and a data generator.
+**batch_size** - Batch size model is being trained with (only when using batch normalization).
 
 **verbose** - Verbosity mode, 0 or 1.
 
@@ -52,15 +52,15 @@ The default schedule is `'manual'`, allowing the learning rate to be controlled 
 
 #### Example
 
-For Keras (with constant LR)
+For Tensorflow Keras (with constant LR)
 ```python
-from sklearn.datasets.samples_generator import make_blobs
-from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import SGD
+from sklearn.datasets import make_blobs
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import SGD
 
-from swa.keras import SWA
+from swa.tfkeras import SWA
  
 # make dataset
 X, y = make_blobs(n_samples=1000, 
@@ -92,16 +92,15 @@ swa = SWA(start_epoch=start_epoch,
 model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
 ```
 
-Or for Keras in Tensorflow (with Cyclic LR)
-
+Or for Keras (with Cyclic LR)
 ```python
-from sklearn.datasets.samples_generator import make_blobs
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, BatchNormalization
-from tensorflow.keras.optimizers import SGD
+from sklearn.datasets import make_blobs
+from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense, BatchNormalization
+from keras.optimizers import SGD
 
-from swa.tfkeras import SWA
+from swa.keras import SWA
 
 # make dataset
 X, y = make_blobs(n_samples=1000, 
@@ -130,10 +129,11 @@ swa = SWA(start_epoch=start_epoch,
           swa_lr=0.001,
           swa_lr2=0.003,
           swa_freq=3,
+          batch_size=32, # needed when using batch norm
           verbose=1)
 
 # train
-model.fit(X, y, epochs=epochs, verbose=1, callbacks=[swa])
+model.fit(X, y, batch_size=32, epochs=epochs, verbose=1, callbacks=[swa])
 ```
 
 Output
