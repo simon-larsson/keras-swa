@@ -183,7 +183,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
 
             return [
                 (swa_w * ((epoch - self.start_epoch) / self.swa_freq) + w)
-                / ((epoch - self.start_epoch) + 1)
+                / ((epoch - self.start_epoch) / self.swa_freq + 1)
                 for swa_w, w in zip(self.swa_weights, self.model.get_weights())
             ]
 
