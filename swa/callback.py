@@ -2,10 +2,10 @@
 """
 
 
-def create_swa_callback_class(K, Callback, BatchNormalization):
+def create_swa_callback_class(K, callback, batch_normalization):
     """Injecting library dependencies"""
 
-    class SWA(Callback):
+    class SWA(callback):
         """Stochastic Weight Averging.
 
         # Paper
@@ -33,7 +33,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
             verbose=0,
         ):
 
-            super(SWA, self).__init__()
+            super().__init__()
             self.start_epoch = start_epoch - 1
             self.lr_schedule = lr_schedule
             self.swa_lr = swa_lr
@@ -220,7 +220,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
             steps = self.params.get("steps")
 
             # occasionally steps parameter will not be set. We then calculate it ourselves
-            if steps == None:
+            if steps is None:
                 steps = self.params["samples"] // self.params["batch_size"]
 
             swa_epoch = (epoch - self.start_epoch) % self.swa_freq
@@ -253,7 +253,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
             self.running_bn_epoch = False
 
             for layer in self.model.layers:
-                if issubclass(layer.__class__, BatchNormalization):
+                if issubclass(layer.__class__, batch_normalization):
                     self.has_batch_norm = True
                     self.batch_norm_momentums.append(layer.momentum)
                     self.batch_norm_layers.append(layer)
@@ -273,7 +273,7 @@ def create_swa_callback_class(K, Callback, BatchNormalization):
                 # layer, build that layer, retrieve its reinitialized moving mean and
                 # moving var weights and then delete the layer
                 bn_config = layer.get_config()
-                new_batch_norm = BatchNormalization(**bn_config)
+                new_batch_norm = batch_normalization(**bn_config)
                 new_batch_norm.build(layer.input_shape)
                 new_moving_mean, new_moving_var = new_batch_norm.get_weights()[-2:]
                 # get rid of the new_batch_norm layer
